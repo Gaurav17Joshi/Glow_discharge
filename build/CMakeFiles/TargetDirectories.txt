@@ -1,0 +1,12 @@
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/lajolla_lib.dir
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/lajolla.dir
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/test_filter.dir
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/test_frame.dir
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/test_image.dir
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/test_intersection.dir
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/test_materials.dir
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/test_matrix.dir
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/test_mipmap.dir
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/test.dir
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/edit_cache.dir
+/Users/gauravjoshi/Desktop/Learn/lajolla_public/build/CMakeFiles/rebuild_cache.dir

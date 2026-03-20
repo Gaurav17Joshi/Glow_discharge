@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scene version="0.5.0">
+
+    <!-- Defaults - can be changed via command line: -Dspp=128 -Dresx=1920 -->
+    <default name="spp" value="64"/>
+    <default name="resx" value="960"/>
+    <default name="resy" value="540"/>
+
+    <!-- Integrator - Full glow discharge renderer with BSDF support -->
+    <integrator type="volpath">
+        <integer name="maxDepth" value="12"/>
+        <integer name="version" value="100"/>  <!-- vol_path_tracing_glow_full -->
+    </integrator>
+
+    <!-- PLASMA MEDIA DEFINITIONS -->
+
+    <!-- Neon yellow plasma medium - for Torus_001 (should be yellow) -->
+    <medium type="glowdischarge" id="yellow_plasma">
+        <float name="alpha" value="12.0"/>      <!-- Ionization coefficient (brightness growth) -->
+        <float name="beta" value="1e-7"/>       <!-- Recombination coefficient (drag) -->
+        <float name="eta" value="0.3"/>         <!-- Attachment coefficient -->
+        <float name="rho" value="100.0"/>       <!-- Ion scale (ions move 100x slower) -->
+        <float name="sigma0" value="1.5"/>      <!-- Collision cross-section scale -->
+
+        <vector3 name="driftCenter" value="0 1.0 0"/>
+        <float name="driftMagnitude" value="1.2"/>      <!-- Drift velocity magnitude -->
+        <vector3 name="driftDirection" value="0 1 0"/>
+        <float name="boundaryRadius" value="2.5"/>      <!-- Glow region boundary -->
+
+        <!-- YELLOW emission -->
+        <!-- <rgb name="emissionColor" value="60.0 80.0 10.0"/> -->
+        <rgb name="emissionColor" value="30.0 40.0 5.0"/>
+        <integer name="integrationSteps" value="48"/>   <!-- ODE solver steps -->
+        <phase type="isotropic"/>
+    </medium>
+
+    <!-- Purple plasma medium - for Torus_002 (top, should be purple) -->
+    <medium type="glowdischarge" id="purple_plasma">
+        <float name="alpha" value="12.0"/>
+        <float name="beta" value="1e-7"/>
+        <float name="eta" value="0.3"/>
+        <float name="rho" value="100.0"/>
+        <float name="sigma0" value="1.5"/>
+
+        <vector3 name="driftCenter" value="0 1.0 0"/>
+        <float name="driftMagnitude" value="1.5"/>
+        <vector3 name="driftDirection" value="0 1 0"/>
+        <float name="boundaryRadius" value="2.5"/>
+
+        <!-- PURPLE/magenta glow -->
+        <!-- <rgb name="emissionColor" value="70.0 15.0 90.0"/> -->
+        <rgb name="emissionColor" value="35.0 8.0 10.0"/>
+        <integer name="integrationSteps" value="48"/>
+        <phase type="isotropic"/>
+    </medium>
+
+    <!-- Camera -->
+    <sensor type="perspective">
+        <string name="fovAxis" value="x"/>
+        <float name="fov" value="39.6"/>
+        <transform name="toWorld">
+            <lookAt target="0, 1, 0" origin="6.36, 4.96, 5.93" up="0, 1, 0"/>
+        </transform>
+        <sampler type="independent">
+            <integer name="sampleCount" value="$spp"/>
+        </sampler>
+        <film type="hdrfilm">
+            <integer name="width" value="$resx"/>
+            <integer name="height" value="$resy"/>
+        </film>
+    </sensor>
+
+    <!-- MATERIALS -->
+
+    <!-- Metallic material for plane -->
+    <bsdf type="plastic" id="metallic_plane">
+        <rgb name="specular_reflectance" value="0.9 0.9 0.95"/>
+        <rgb name="diffuse_reflectance" value="0.2 0.2 0.25"/>
+    </bsdf>
+
+    <!-- Green diffuse for rook -->
+    <bsdf type="diffuse" id="green_rook">
+        <rgb name="reflectance" value="0.2 0.65 0.3"/>
+    </bsdf>
+
+    <!-- Queen materials (keep original) -->
+    <bsdf type="diffuse" id="mat-Black_and_gold_marble">
+        <rgb name="reflectance" value="1.0 0.0 0.3"/>
+    </bsdf>
+
+    <bsdf type="plastic" id="mat-FJ">
+        <rgb name="specular_reflectance" value="0.95 0.6 0.6"/>
+        <rgb name="diffuse_reflectance" value="0.8 0.1 0.1"/>
+    </bsdf>
+
+    <bsdf type="diffuse" id="mat-Green_carpet">
+        <rgb name="reflectance" value="0.2 0.6 0.3"/>
+    </bsdf>
+
+    <!-- Point light -->
+    <!-- <bsdf type="diffuse" id="light_bsdf">
+        <rgb name="reflectance" value="0.0 0.0 0.0"/>
+    </bsdf>
+
+    <shape type="sphere">
+        <point name="center" x="4.076" y="5.904" z="-1.005"/>
+        <float name="radius" value="0.3"/>
+        <ref name="bsdf" id="light_bsdf"/>
+        <emitter type="area">
+            <rgb name="radiance" value="79.58 79.58 79.58"/>
+        </emitter>
+    </shape> -->
+
+    <!-- SCENE GEOMETRY -->
+
+    <!-- Torus_001 should be YELLOW (user specified) -->
+    <shape type="ply">
+        <string name="filename" value="meshes/Torus_001.ply"/>
+        <boolean name="face_normals" value="true"/>
+        <ref name="interior" id="yellow_plasma"/>
+    </shape>
+
+    <!-- Torus_002 (top/large) should be PURPLE -->
+    <shape type="ply">
+        <string name="filename" value="meshes/Torus_002.ply"/>
+        <boolean name="face_normals" value="true"/>
+        <ref name="interior" id="purple_plasma"/>
+    </shape>
+
+    <!-- Metallic plane -->
+    <shape type="ply">
+        <string name="filename" value="meshes/Plane.ply"/>
+        <boolean name="face_normals" value="true"/>
+        <ref name="bsdf" id="metallic_plane"/>
+    </shape>
+
+    <!-- Queen chess piece parts -->
+    <shape type="ply">
+        <string name="filename" value="meshes/Queen_chess_piece-Black and gold marble.ply"/>
+        <ref name="bsdf" id="mat-Black_and_gold_marble"/>
+    </shape>
+
+    <shape type="ply">
+        <string name="filename" value="meshes/Queen_chess_piece-FJ.ply"/>
+        <ref name="bsdf" id="mat-FJ"/>
+    </shape>
+
+    <shape type="ply">
+        <string name="filename" value="meshes/Queen_chess_piece-Green carpet.001.ply"/>
+        <ref name="bsdf" id="mat-Green_carpet"/>
+    </shape>
+
+    <!-- Rook chess piece parts - GREEN -->
+    <shape type="ply">
+        <string name="filename" value="meshes/Rook_chess_piece-Black and gold marble.002.ply"/>
+        <ref name="bsdf" id="green_rook"/>
+    </shape>
+
+    <shape type="ply">
+        <string name="filename" value="meshes/Rook_chess_piece-Green carpet.002.ply"/>
+        <ref name="bsdf" id="green_rook"/>
+    </shape>
+
+</scene>

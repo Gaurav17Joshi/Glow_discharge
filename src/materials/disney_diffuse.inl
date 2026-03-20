@@ -1,0 +1,68 @@
+Spectrum eval_op::operator()(const DisneyDiffuse &bsdf) const {
+    if (dot(vertex.geometric_normal, dir_in) < 0 ||
+            dot(vertex.geometric_normal, dir_out) < 0) {
+        // No light below the surface
+        return make_zero_spectrum();
+    }
+    // Flip the shading frame if it is inconsistent with the geometry normal
+    Frame frame = vertex.shading_frame;
+    if (dot(frame.n, dir_in) < 0) {
+        frame = -frame;
+    }
+
+    Spectrum base_color = eval(bsdf.base_color, vertex.uv, vertex.uv_screen_size, texture_pool);
+    Real roughness = eval(bsdf.roughness, vertex.uv, vertex.uv_screen_size, texture_pool);
+    Real subsurface = eval(bsdf.subsurface, vertex.uv, vertex.uv_screen_size, texture_pool);
+
+    Vector3 h = normalize(dir_in + dir_out);
+    Real n_dot_in = dot(frame.n, dir_in);
+    Real n_dot_out = dot(frame.n, dir_out);
+    Real h_dot_out = dot(h, dir_out);
+
+    Real F_D90 = 0.5 + 2 * roughness * h_dot_out * h_dot_out;
+    Real F_D_in = 1 + (F_D90 - 1) * pow(1 - n_dot_in, 5);
+    Real F_D_out = 1 + (F_D90 - 1) * pow(1 - n_dot_out, 5);
+    Spectrum f_base = (base_color / c_PI) * F_D_in * F_D_out * n_dot_out;
+
+    Real F_SS90 = roughness * h_dot_out * h_dot_out;
+    Real F_SS_in = 1 + (F_SS90 - 1) * pow(1 - n_dot_in, 5);
+    Real F_SS_out = 1 + (F_SS90 - 1) * pow(1 - n_dot_out, 5);
+    Spectrum f_sub = (1.25 * base_color / c_PI) * (F_SS_in * F_SS_out * (1 / (n_dot_in + n_dot_out) - 0.5) + 0.5) * n_dot_out;
+
+    return (1 - subsurface) * f_base + subsurface * f_sub;
+}
+
+Real pdf_sample_bsdf_op::operator()(const DisneyDiffuse &bsdf) const {
+    if (dot(vertex.geometric_normal, dir_in) < 0 ||
+            dot(vertex.geometric_normal, dir_out) < 0) {
+        // No light below the surface
+        return 0;
+    }
+    // Flip the shading frame if it is inconsistent with the geometry normal
+    Frame frame = vertex.shading_frame;
+    if (dot(frame.n, dir_in) < 0) {
+        frame = -frame;
+    }
+    
+    return fmax(dot(frame.n, dir_out), Real(0)) / c_PI;
+}
+
+std::optional<BSDFSampleRecord> sample_bsdf_op::operator()(const DisneyDiffuse &bsdf) const {
+    if (dot(vertex.geometric_normal, dir_in) < 0) {
+        // No light below the surface
+        return {};
+    }
+    // Flip the shading frame if it is inconsistent with the geometry normal
+    Frame frame = vertex.shading_frame;
+    if (dot(frame.n, dir_in) < 0) {
+        frame = -frame;
+    }
+    
+    return BSDFSampleRecord{
+        to_world(frame, sample_cos_hemisphere(rnd_param_uv)),
+        Real(0) /* eta */, Real(1) /* roughness */};
+}
+
+TextureSpectrum get_texture_op::operator()(const DisneyDiffuse &bsdf) const {
+    return bsdf.base_color;
+}
